@@ -1,18 +1,35 @@
-Tedis is a class providing some simple tools to use when testing code that 
-uses Redis as a queue, specifically with ResQ.
+=====
+Tedis
+=====
 
-The idea is that a user can provide a list of items with specially formatted
+What is it?
+-----------
+Tedis is a class providing some simple tools to use when testing code that 
+uses Redis as a queue.
+
+The idea is that a user can provide a template with specially formatted
 text, such that the code can do replacements in the text according to rules
 given inside the placeholders.
 
-Example Usage::
-    >>> from tedis import Tedis
+Tedis exists because I wanted a quick and easy way to put a ton of data into 
+Redis with a given format and key. I have no plans to support other backends.
 
-    >>> template = "There are {{int:6}} items left in the {{ str:10 }} shopping cart{{str:15}}"
-    >>> tester = Tedis(server = 'localhost:6379', redis_key = 'bacon')
-    >>> tester.load(template, 10000)
-    >>> tester.dump()
-    >>> tester.close()
+Example Usage
+-------------
+
+>>> from tedis import Tedis
+
+>>> template = "There are {{int:6}} items left in the {{ str:10 }} shopping cart{{str:15}}"
+>>> tester = Tedis(server = 'localhost:6379', redis_key = 'bacon')
+>>> tester.load(template, 10000)
+>>> tester.dump()
+>>> tester.close()
 
 The class will then write the given number of elements to the Redis server
 making each random so that testing can be more reliable.
+
+TODO
+----
+- Let the user create different types of for the template itself (JSON, class, etc.).
+- Let strings be alphabetical, alphanumeric, or contain punctuation.
+- Make the key a class property so user can change it during the session.
