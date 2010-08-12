@@ -19,7 +19,7 @@ Example Usage
 
 >>> from tedis import Tedis
 
->>> template = "There are {{int:6}} items left in the {{ str:10 }} shopping cart{{str:15}}"
+>>> template = "Integer: {{int:6}} | Alpha: {{ str:10:alpha }} | Alphapunc: {{str:15:alphapunc}} | Alphanumeric: {{str:6:alphanumeric}}"
 >>> tester = Tedis(server = 'localhost:6379', redis_key = 'bacon')
 >>> tester.load(template, 10000)
 >>> tester.dump()
@@ -28,8 +28,13 @@ Example Usage
 The class will then write the given number of elements to the Redis server
 making each random so that testing can be more reliable.
 
+Note: Because the string creation is random, if you specify `alphanumeric` 
+as the string flavor there's no guarantee (yet) that it will contain both 
+letters and digits.
+
 TODO
 ----
-- Let the user create different types of for the template itself (JSON, class, etc.).
-- Let strings be alphabetical, alphanumeric, or contain punctuation.
+- Let the user create different types of objects for the template itself (JSON, class, etc.).
+X Let strings be alphabetical, alphanumeric, or contain punctuation.
 - Make the key a class property so user can change it during the session.
+- Handle template miscues gracefully.

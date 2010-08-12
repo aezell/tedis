@@ -14,7 +14,7 @@ class Tedis(object):
     Example Usage::
         >>> from tedis import Tedis
 
-        >>> template = "There are {{int:6}} items left in the {{ str:10 }} shopping cart{{str:15}}"
+        >>> template = "There are {{int:6}} items left in the {{ str:10:alpha }} shopping cart - {{str:15:alphanumeric}}"
         >>> tester = Tedis(server = 'localhost:6379', redis_key = 'bacon')
         >>> tester.load(template, 10000)
         >>> tester.dump()
@@ -25,7 +25,7 @@ class Tedis(object):
 
     """
 
-    def __init__(self, server = 'localhost:6379',  password = None, redis_key = 'test'):
+    def __init__(self, server = 'localhost:6379', password = None, redis_key = 'test'):
         super(Tedis, self).__init__()
         self._set_redis(server)
         self.redis_key = redis_key
@@ -54,13 +54,21 @@ class Tedis(object):
             if ph_detail['type'] == 'int':
                 template = template.replace(ph_detail['original_string'], self._create_random_int(ph_detail['size']), 1)
             if ph_detail['type'] == 'str':
-                template = template.replace(ph_detail['original_string'], self._create_random_string(ph_detail['size']), 1)
+                template = template.replace(ph_detail['original_string'], self._create_random_string(ph_detail['size'], ph_detail['flavor']), 1)
         return template
 
-    def _create_random_string(self, size):
-        """Creates a random string of the given size."""
-        # implement string types
-        return ''.join(random.choice(string.letters) for i in range(size))
+    def _create_random_string(self, size, flavor = 'alpha'):
+        """Creates a random string of the given size and flavor."""
+        if flavor not in ['alpha', 'alphanumeric', 'punc', 'alphapunc', 'puncnumeric']:
+            flavor = 'alpha'
+        flavor_choice = {
+            'alpha': string.letters,
+            'alphanumeric': string.letters + string.digits,
+            'punc': string.punctuation,
+            'alphapunc': string.letters + string.punctuation,
+            'puncnumeric': string.punctuation + string.digits
+        }[flavor]
+        return ''.join(random.sample(flavor_choice, size))
 
     def _random_with_N_digits(self, size):
         range_start = 10**(size-1)
@@ -82,6 +90,8 @@ class Tedis(object):
             ph_detail['original_string'] = match[0]
             ph_detail['type'] = parts[0]
             ph_detail['size'] = int(parts[1])
+            if parts[0] == 'str':
+                ph_detail['flavor'] = parts[2]
             placeholders.append(ph_detail)
         return placeholders
 
@@ -103,4 +113,3 @@ class Tedis(object):
     def close(self):
         """Close the underlying redis connection."""
         self.redis.connection.disconnect()
-    
